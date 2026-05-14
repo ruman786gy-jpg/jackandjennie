@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Anime Database</title>
+    <style>
+        body { background-color: #121212; color: white; font-family: sans-serif; margin: 0; }
+        header { background: #e50914; padding: 20px; text-align: center; font-weight: bold; font-size: 24px; }
+        #search-container { text-align: center; padding: 20px; }
+        input { padding: 10px; width: 60%; border-radius: 5px; border: none; }
+        #anime-list { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
+            gap: 20px; 
+            padding: 20px; 
+        }
+        .anime-card { background: #1f1f1f; border-radius: 10px; overflow: hidden; text-align: center; padding-bottom: 10px; transition: 0.3s; }
+        .anime-card:hover { transform: translateY(-5px); background: #2a2a2a; }
+        .anime-card img { width: 100%; height: 300px; object-fit: cover; }
+        .anime-card h3 { font-size: 16px; padding: 0 10px; height: 40px; overflow: hidden; }
+    </style>
+</head>
+<body>
+
+<header>ANIME ARCHIVE</header>
+
+<div id="search-container">
+    <input type="text" id="searchBox" placeholder="Search for any anime (e.g. Naruto, Monster, Bleach)...">
+</div>
+
+<div id="anime-list">
+    <!-- Anime data will appear here automatically -->
+</div>
+
+<script>
+    const animeList = document.getElementById('anime-list');
+    const searchBox = document.getElementById('searchBox');
+
+    // Function to fetch data from the API
+    async function getAnime(query = '') {
+        const url = query 
+            ? `https://api.jikan.moe/v4/anime?q=${query}&limit=20` 
+            : `https://api.jikan.moe/v4/top/anime?limit=20`;
+        
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+            displayAnime(data.data);
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        }
+    }
+
+    // Function to display cards on the screen
+    function displayAnime(list) {
+        animeList.innerHTML = '';
+        list.forEach(anime => {
+            const card = `
+                <div class="anime-card">
+                    <img src="${anime.images.jpg.image_url}" alt="${anime.title}">
+                    <h3>${anime.title}</h3>
+                    <p style="color: #e50914;">Score: ${anime.score || 'N/A'}</p>
+                </div>
+            `;
+            animeList.innerHTML += card;
+        });
+    }
+
+    // Listen for typing in the search box
+    searchBox.addEventListener('input', (e) => {
+        if (e.target.value.length > 2) {
+            getAnime(e.target.value);
+        }
+    });
+
+    // Load top anime by default on start
+    getAnime();
+</script>
+
+</body>
+</html>
